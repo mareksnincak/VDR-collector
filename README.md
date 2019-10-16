@@ -18,4 +18,5 @@ Used to collect VDR from device
 
 #### output
 Check */data* folder. One file corresponds to one VDR record.
+
 Filename convention: *vdr-%timestamp in ms%.json* .
