@@ -22,3 +22,14 @@ ws.on('message', data => {
     console.log('record saved');
   });
 });
+
+ws.on('error', err => {
+  console.log(err);
+});
+
+
+process.on('SIGINT', function() {
+  // disable development record
+  console.log('disabled dev record saving');
+  process.exit();
+});
