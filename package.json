@@ -2,11 +2,12 @@
   "name": "vdr-collector",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "collector.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "node app.js"
+    "serve": "node collector.js",
+    "lint": "eslint collector.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,10 @@
     "minimist": "^1.2.0",
     "urllib": "^2.34.1",
     "ws": "^7.1.2"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
   }
 }

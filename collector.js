@@ -1,5 +1,3 @@
-'use strict';
-
 const WebSocket = require('ws');
 const fs = require('fs');
 const args = require('minimist')(process.argv.slice(2));
@@ -8,9 +6,9 @@ const urllib = require('urllib');
 const ENABLE = 1;
 const DISABLE = 0;
 
-if (!args._ || !args.a || !args.p) {
+if (!args._ || !args._.length || !args.a || !args.p) {
   console.log('Usage: node collector.js ADDRESS -a AUTH -p WS PORT [-o OUTPUT FOLDER] [-r NUMBER OF RETRIES]');
-  return;
+  process.exit();
 }
 
 const ADDR = args._[0];
@@ -26,15 +24,17 @@ const setDeviceParams = async (params, allowedRetries = MAX_RETRIES) => {
       {
         method: 'POST',
         data: {
-          "params": [ params ]
+          params: [params],
         },
         contentType: 'json',
         digestAuth: AUTH,
-      }
+      },
     );
-  
-    if (result.status !== 200 || !result.data) throw (result.res && result.res.statusMessage) || result.status;
-  
+
+    if (result.status !== 200 || !result.data) {
+      throw (result.res && result.res.statusMessage) || result.status;
+    }
+
     const data = JSON.parse(result.data);
     if (data.result) throw data;
   } catch (err) {
@@ -50,21 +50,21 @@ const setDeviceParams = async (params, allowedRetries = MAX_RETRIES) => {
 
 const setDevelopmentRecordStream = async (value = DISABLE) => {
   await setDeviceParams({
-    "name": "/deviceSetup/dataOutput/ethernet/pushStream/recordTypeDevelopment",
-    "value": String(value)
+    name: '/deviceSetup/dataOutput/ethernet/pushStream/recordTypeDevelopment',
+    value: String(value),
   });
 };
 
 const setStream = async (value = DISABLE) => {
   await setDeviceParams({
-    "name": "/deviceSetup/dataOutput/ethernet/pushStream/enable",
-    "value": String(value)
+    name: '/deviceSetup/dataOutput/ethernet/pushStream/enable',
+    value: String(value),
   });
 };
 
 const collectRecords = (allowedRetries = MAX_RETRIES) => {
   const ws = new WebSocket(`ws://${ADDR}:${PORT}`);
-    
+
   console.log('waiting for device');
 
   ws.on('open', () => {
@@ -86,7 +86,6 @@ const collectRecords = (allowedRetries = MAX_RETRIES) => {
     }
 
     console.error(err);
-    return;
   });
 };
 
@@ -101,15 +100,15 @@ const init = async () => {
     process.exit();
   }
 
-  if (!fs.existsSync(OUTPUT_FOLDER)){
-      fs.mkdirSync(OUTPUT_FOLDER);
+  if (!fs.existsSync(OUTPUT_FOLDER)) {
+    fs.mkdirSync(OUTPUT_FOLDER);
   }
-  
+
   collectRecords();
 };
 
 process.on('SIGINT', async () => {
-  // disable streaming on exit 
+  // disable streaming on exit
   try {
     console.debug('disabling development record and streaming');
     await Promise.all([setDevelopmentRecordStream(DISABLE), setStream(DISABLE)]);
