@@ -62,6 +62,21 @@ const setStream = async (value = DISABLE) => {
   });
 };
 
+const clean = async () => {
+  // disable streaming on exit
+  try {
+    console.debug('disabling development record and streaming');
+    await Promise.all([setDevelopmentRecordStream(DISABLE), setStream(DISABLE)]);
+  } catch (err) {
+    console.error('error\n', err);
+  }
+};
+
+const cleanExit = async () => {
+  await clean();
+  process.exit();
+};
+
 const collectRecords = (allowedRetries = MAX_RETRIES) => {
   const ws = new WebSocket(`ws://${ADDR}:${PORT}`);
 
@@ -78,7 +93,7 @@ const collectRecords = (allowedRetries = MAX_RETRIES) => {
     });
   });
 
-  ws.on('error', err => {
+  ws.on('error', async err => {
     if (allowedRetries) {
       console.debug('retrying...');
       collectRecords(allowedRetries - 1);
@@ -86,10 +101,20 @@ const collectRecords = (allowedRetries = MAX_RETRIES) => {
     }
 
     console.error(err);
+    cleanExit();
   });
 };
 
 const init = async () => {
+  if (!fs.existsSync(OUTPUT_FOLDER)) {
+    try {
+      await fs.mkdirSync(OUTPUT_FOLDER);
+    } catch (err) {
+      console.error('error creating folder', err);
+      process.exit();
+    }
+  }
+
   try {
     console.debug('enabling development record');
     await setDevelopmentRecordStream(ENABLE);
@@ -100,23 +125,11 @@ const init = async () => {
     process.exit();
   }
 
-  if (!fs.existsSync(OUTPUT_FOLDER)) {
-    fs.mkdirSync(OUTPUT_FOLDER);
-  }
-
   collectRecords();
 };
 
 process.on('SIGINT', async () => {
-  // disable streaming on exit
-  try {
-    console.debug('disabling development record and streaming');
-    await Promise.all([setDevelopmentRecordStream(DISABLE), setStream(DISABLE)]);
-  } catch (err) {
-    console.error('error\n', err);
-  }
-
-  process.exit();
+  cleanExit();
 });
 
 init();
