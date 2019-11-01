@@ -108,7 +108,7 @@ const collectRecords = (allowedRetries = MAX_RETRIES) => {
 const init = async () => {
   if (!fs.existsSync(OUTPUT_FOLDER)) {
     try {
-      await fs.mkdirSync(OUTPUT_FOLDER);
+      fs.mkdirSync(OUTPUT_FOLDER);
     } catch (err) {
       console.error('error creating folder', err);
       process.exit();
