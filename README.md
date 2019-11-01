@@ -21,6 +21,14 @@ node collector.js ADDRESS -a AUTH -p WS PORT [-o OUTPUT FOLDER] [-r NUMBER OF RE
 * `-o OUTPUT FOLDER` (optional) folder to store output files
 * `-r NUMBER OF RETRIES` (optional) number of retries in case of failed network operations
 
+##### example
+
+```bash
+node collector.js 182.108.142.232 -a user123:mypassword -p 12345
+node collector.js 182.108.142.232 -a user123:mypassword -p 12345 -o C:\Users\user123\Desktop\out
+node collector.js 182.108.142.232 -a user123:mypassword -p 12345 -o C:\Users\user123\Desktop\out -r 5
+```
+
 ### output
 Data output is saved to */data* folder by default. One file corresponds to one VDR record.
 
