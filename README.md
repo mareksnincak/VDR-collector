@@ -21,7 +21,7 @@ node collector.js ADDRESS -a AUTH -p WS PORT [-o OUTPUT FOLDER] [-r NUMBER OF RE
 * `-o OUTPUT FOLDER` (optional) folder to store output files
 * `-r NUMBER OF RETRIES` (optional) number of retries in case of failed network operations
 
-##### example
+##### examples
 
 ```bash
 node collector.js 182.108.142.232 -a user123:mypassword -p 12345
