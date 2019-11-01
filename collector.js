@@ -5,6 +5,9 @@ const fs = require('fs');
 const args = require('minimist')(process.argv.slice(2));
 const urllib = require('urllib');
 
+const ENABLE = 1;
+const DISABLE = 0;
+
 if (!args._ || !args.a || !args.p) {
   console.log('Usage: node collector.js ADDRESS -a AUTH -p WS PORT [-o OUTPUT FOLDER] [-r NUMBER OF RETRIES]');
   return;
@@ -16,20 +19,14 @@ const AUTH = args.a;
 const MAX_RETRIES = Number(args.r) || 3;
 const OUTPUT_FOLDER = (args.o && args.o.replace(/(\/|\\)$/, '')) || 'data';
 
-
-const setDevelopmentRecordStream = async (value = 0, allowedRetries = MAX_RETRIES) => {
+const setDeviceParams = async (params, allowedRetries = MAX_RETRIES) => {
   try {
     const result = await urllib.request(
       `http://${ADDR}/api/param/set`,
       {
         method: 'POST',
         data: {
-          "params": [
-              {
-                  "name": "/deviceSetup/dataOutput/ethernet/pushStream/recordTypeDevelopment",
-                  "value": String(value)
-              }
-          ]
+          "params": [ params ]
         },
         contentType: 'json',
         digestAuth: AUTH,
@@ -40,17 +37,29 @@ const setDevelopmentRecordStream = async (value = 0, allowedRetries = MAX_RETRIE
   
     const data = JSON.parse(result.data);
     if (data.result) throw data;
-    
-    console.debug('done');
   } catch (err) {
     if (allowedRetries) {
       console.debug('retrying...');
-      await setDevelopmentRecordStream(value, allowedRetries - 1);
+      await setDeviceParams(params, allowedRetries - 1);
       return;
     }
 
     throw err;
   }
+};
+
+const setDevelopmentRecordStream = async (value = DISABLE) => {
+  await setDeviceParams({
+    "name": "/deviceSetup/dataOutput/ethernet/pushStream/recordTypeDevelopment",
+    "value": String(value)
+  });
+};
+
+const setStream = async (value = DISABLE) => {
+  await setDeviceParams({
+    "name": "/deviceSetup/dataOutput/ethernet/pushStream/enable",
+    "value": String(value)
+  });
 };
 
 const collectRecords = (allowedRetries = MAX_RETRIES) => {
@@ -83,10 +92,12 @@ const collectRecords = (allowedRetries = MAX_RETRIES) => {
 
 const init = async () => {
   try {
-    console.debug('enabling development record streaming');
-    await setDevelopmentRecordStream(1);
+    console.debug('enabling development record');
+    await setDevelopmentRecordStream(ENABLE);
+    console.debug('enabling streaming');
+    await setStream(ENABLE);
   } catch (err) {
-    console.error('unable to set development record streaming\n', err);
+    console.error('error\n', err);
     process.exit();
   }
 
@@ -97,16 +108,16 @@ const init = async () => {
   collectRecords();
 };
 
-init();
-
 process.on('SIGINT', async () => {
-  // disable development record on exit
+  // disable streaming on exit 
   try {
-    console.debug('disabling development record streaming');
-    await setDevelopmentRecordStream(0);
+    console.debug('disabling development record and streaming');
+    await Promise.all([setDevelopmentRecordStream(DISABLE), setStream(DISABLE)]);
   } catch (err) {
-    console.error('unable to set development record streaming\n', err);
+    console.error('error\n', err);
   }
 
   process.exit();
 });
+
+init();
