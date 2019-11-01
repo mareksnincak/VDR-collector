@@ -62,7 +62,7 @@ const setStream = async (value = DISABLE) => {
   });
 };
 
-const clean = async () => {
+const cleanExit = async () => {
   // disable streaming on exit
   try {
     console.debug('disabling development record and streaming');
@@ -70,10 +70,7 @@ const clean = async () => {
   } catch (err) {
     console.error('error\n', err);
   }
-};
 
-const cleanExit = async () => {
-  await clean();
   process.exit();
 };
 
