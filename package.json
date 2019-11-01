@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "node collector.js",
     "lint": "eslint collector.js"
   },
   "repository": {
