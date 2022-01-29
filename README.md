@@ -1,6 +1,6 @@
 # VDR-collector
 
-Used to collect VDR from device
+Script that was used to load vehicle data records (VDR) from traffic data collector. These records were further processed to calculate vehicle parameters such as vehicle weight. See https://vedanadosah.cvtisr.sk/technika/informacne-a-komunikacne-technologie/ako-postavit-auto-na-vahu-nastastie-to-netreba-studenti-stu-hladaju-iny-sposob/
 
 ### dependencies
 
